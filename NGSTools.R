@@ -7,11 +7,8 @@ counts <- function(peaks.list, bam_dir, bam_labels, modus, sample_labels) {
   readsDir <- bam_dir
   labels   <- bam_labels
   bams     <- paste(readsDir, labels, ".sorted.",modus,"bam",sep="")
-  ## 
-  #fc_PE    <- Rsubread::featureCounts(files=bams,  allowMultiOverlap=T, requireBothEndsMapped = F,countMultiMappingReads = T, countChimericFragments = T, annot.ext = annotated.merged.peaks.saf, isPairedEnd=c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE), nthreads=20)
-  fc_PE    <- Rsubread::featureCounts(files=bams, annot.ext = annotated.merged.peaks.saf, isPairedEnd=c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE), nthreads=60)
- # fc_PE    <- Rsubread::featureCounts(files=bams,  allowMultiOverlap=T, requireBothEndsMapped = T,countMultiMappingReads = T, countChimericFragments = T, annot.ext = annotated.merged.peaks.saf, isPairedEnd=c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE), nthreads=20)
-  
+
+  fc_PE    <- Rsubread::featureCounts(files=bams, annot.ext = annotated.merged.peaks.saf, isPairedEnd=c(TRUE,TRUE,TRUE,TRUE,TRUE,TRUE), nthreads=60)  
   counts   <- as.data.frame(fc_PE$counts)
   colnames(counts)  <- sample_labels
   counts$Gene <- rownames(counts)
