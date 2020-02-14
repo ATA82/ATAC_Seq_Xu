@@ -40,7 +40,7 @@ bcl2fastq-conversion-software.html]. Library complexity was evaluated with Prese
     (12) Liberzon, A. et al. The Molecular Signatures Database (MSigDB) hallmark gene set collection. Cell Syst. 1, 417–425 (2015).
 
 ## Usage
-The R markdown script called Xu_Tubuloid.Rmd contains the main pipeline for the ATAC-Seq Analysis in this paper. Addionally generating the extended merged peak file was performed using a java class included in this repository and the command mergeBed from bedtools. This is also described in the Rmd file. 
+The R markdown script called Xu_Tubuloid.Rmd contains the main code for the ATAC-Seq Analysis in this paper. Additionally generating the extended merged peak file was performed using a java class included in this repository and the command mergeBed from bedtools. This is also described in the Rmd file. 
 
 The R markdown script contains also the code chunks used to generate the ATAC-Seq plots integrated in the figures of this paper. Only the track figures were created separately with IGV.
 
