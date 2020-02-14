@@ -65,7 +65,7 @@ MultiQC | https://multiqc.info/ | 1.7 |
 bwa | bio-bwa.sourceforge.net | 0.7.17 |
 Rsamtools | bioconductor | 2.0.0 |
 samtools | http://www.htslib.org/download/ | 0.1.19 |
-macs2 | https://github.com/taoliu/MACS | 2.2.5 |
+macs2 | https://github.com/taoliu/MACS | 2.1.2 |
 rtracklayer | bioconductor | 1.44.2 |
 ChIPseeker | bioconductor | 1.20.0 |
 Rsubread | bioconductor | 1.34.7 |
