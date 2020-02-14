@@ -26,11 +26,11 @@ public class MergedPeaksExpander {
 			
 			if(DEBUG) {
 				args[0] = "-m";
-				args[1] = "/home/aabdalla/Desktop/NextGen2/scratch/data/projects/kramann/jack.3/4_peaks/withDup/FS3.merged.txt";
+				args[1] = "FS3.merged.txt";
 				args[2] = "-s";
 				args[3] = "CD24-1.3,CD24-2.3,CD24-3.3,CD13-1.3,CD13-2.3,CD13-3.3";
 				args[4] = "-o";
-				args[5] = "/home/aabdalla/Desktop/NextGen2/scratch/data/projects/kramann/jack.3/4_peaks/withDup/FS3.merged.expanded.txt";
+				args[5] = "FS3.merged.expanded.txt";
 				args[6] = "-n";
 				args[7] = "true";
 				args[8] = "-r";
