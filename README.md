@@ -1,4 +1,4 @@
-# ATAC_Seq_Xu
+# Bulk ATAC-Seq analysis on CD13+/CD24+ sorted cells from human adult kidney tissue.
 
 ## General:
 6 ATAC-Seq samples from one female renal cell carcinoma patient:
@@ -34,3 +34,10 @@ bcl2fastq-conversion-software.html]. Library complexity was evaluated with Prese
     (10) Love, M. I., Huber, W. & Anders, S. Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biol. 15, 550 (2014).
     (11) Väremo, L., Nielsen, J. & Nookaew, I. Enriching the gene set analysis of genome-wide data by incorporating directionality of gene expression and combining statistical hypotheses and methods. Nucleic Acids Res. 41, 4378–4391 (2013).
     (12) Liberzon, A. et al. The Molecular Signatures Database (MSigDB) hallmark gene set collection. Cell Syst. 1, 417–425 (2015).
+    
+## Environment
+    
+Package Name | Source | Version |
+------------ | ------------- | ------------- |
+Content from cell 1 | Content from cell 2 |
+Content in the first column | Content in the second column |
