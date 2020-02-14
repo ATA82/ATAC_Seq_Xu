@@ -45,14 +45,16 @@ The R markdown script called Xu_Tubuloid.Rmd contains the main code for the ATAC
 The R markdown script contains also the code chunks used to generate the ATAC-Seq plots integrated in the figures of this paper. Only the track figures were created separately with IGV.
 
 The analysis is based on 6 ATAC-Seq libraries based on Samples from one female renal cell carcinoma patient:
-1. FS3.CD13_R1: CD13+ sorted cells from human adult kidney tissue.
-2. FS3.CD13_R2: CD13+ sorted cells from human adult kidney tissue.
-3. FS3.CD13_R3: CD13+ sorted cells from human adult kidney tissue.
-4. FS3.CD24_R1: CD24+ sorted cells from human adult kidney tissue.
-5. FS3.CD24_R2: CD24+ sorted cells from human adult kidney tissue.
-6. FS3.CD24_R3: CD24+ sorted cells from human adult kidney tissue.
+1. **FS3.CD13_R1**: CD13+ sorted cells from human adult kidney tissue.
+2. **FS3.CD13_R2**: CD13+ sorted cells from human adult kidney tissue.
+3. **FS3.CD13_R3**: CD13+ sorted cells from human adult kidney tissue.
+4. **FS3.CD24_R1**: CD24+ sorted cells from human adult kidney tissue.
+5. **FS3.CD24_R2**: CD24+ sorted cells from human adult kidney tissue.
+6. **FS3.CD24_R3**: CD24+ sorted cells from human adult kidney tissue.
 
-[Optionally] Request access to the raw sequencing 10x data (FastQ files) to Rafael Kramann following the manuscript details. Then preprocess the data following your preferences. The processed data with peaks tables of each sample alongside of the merge version the reads counts table of the peaks overlaping 1KB aroud TSS region are available at https://figshare.com/s/728705bc42446275044d.
+**[Optionally]** Request access to the raw sequencing 10x data (FastQ files) to Rafael Kramann following the manuscript details. Then preprocess the data following your preferences. 
+
+The processed data with peaks tables of each sample alongside of the merge version the reads counts table of the peaks overlaping 1KB aroud TSS region are available at https://figshare.com/s/728705bc42446275044d.
 
 ## Environment
     
