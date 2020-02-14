@@ -2,12 +2,12 @@
 
 ## General:
 6 ATAC-Seq samples from one female renal cell carcinoma patient:
-FS3.CD13_R1: CD13+ sorted cells from human adult kidney tissue.
-FS3.CD13_R2: CD13+ sorted cells from human adult kidney tissue.
-FS3.CD13_R3: CD13+ sorted cells from human adult kidney tissue.
-FS3.CD24_R1: CD24+ sorted cells from human adult kidney tissue.
-FS3.CD24_R2: CD24+ sorted cells from human adult kidney tissue.
-FS3.CD24_R3: CD24+ sorted cells from human adult kidney tissue.
+1. FS3.CD13_R1: CD13+ sorted cells from human adult kidney tissue.
+2. FS3.CD13_R2: CD13+ sorted cells from human adult kidney tissue.
+3. FS3.CD13_R3: CD13+ sorted cells from human adult kidney tissue.
+4. FS3.CD24_R1: CD24+ sorted cells from human adult kidney tissue.
+5. FS3.CD24_R2: CD24+ sorted cells from human adult kidney tissue.
+6. FS3.CD24_R3: CD24+ sorted cells from human adult kidney tissue.
 
 ## Description of Processed Data:
 Available at https://figshare.com/s/728705bc42446275044d
