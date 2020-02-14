@@ -178,8 +178,4 @@ loaded via a namespace (and not attached):
 
 </code></pre>
 </article>
-  </div>
-
-    </div>
-
-  
+</div>
