@@ -12,15 +12,13 @@
 ## Description of Processed Data:
 Available at https://figshare.com/s/728705bc42446275044d
 
-_Raw Peak Tables:_
+*_Raw Peak Tables:_
 A narrowpeak file for each of the 6 ATAC-seq libraries.
-
-_Extended, merged and annotated Peak Table:_ 
+*_Extended, merged and annotated Peak Table:_ 
 A table in an extended narrow peak format containing all peaks overlapping 1KB region aroud TSS.
-_Count Table:_
+*_Count Table:_
 contains for each of the 6 samples counts of the reads mapping on a region overlapping the selected peaks.
 
-Processed gene expression values from the single-cell RNA-seq are https://doi.org/10.6084/m9.figshare.11786238
 
 ## Method Description
 The ATAC-Seq data analysis was performed as follows: Generation of fastq files and adapter removal were completed with the Illumina software bcl2fastq (v2.20) [https://support.illumina.com/sequencing/sequencing_software/
