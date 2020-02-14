@@ -1,0 +1,278 @@
+---
+title: "ATAC-Seq Analysis: Adult kidney tubuloids originate from a distinct proximal tubule subset and can model hereditary disease."
+author:
+- name: Dr. Ali T. Abdallah
+  affiliation: Interdisciplinary Center for Clinical Research - RWTH-Aachen
+date: "06.02.2020"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+<style>
+.main-container{
+  min-width: 1600px;!important
+  margin-left: auto;!important
+  margin-right: auto;!important
+}
+table{
+width:100%;
+}
+.tabset{
+}
+.download{
+	padding: 10px 15px;
+	background: #4479BA;
+	color: #FFF;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	border: solid 1px #20538D;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+	-webkit-transition-duration: 0.2s;
+	-moz-transition-duration: 0.2s;
+	transition-duration: 0.2s;
+	-webkit-user-select:none;
+	-moz-user-select:none;
+	-ms-user-select:none;
+	user-select:none;
+}
+.download:hover{
+	background: #356094;
+	border: solid 1px #2A4E77;
+	text-decoration: none;
+}
+.download:active{
+	-webkit-box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+	-moz-box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+	box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+	background: #2E5481;
+	border: solid 1px #203E5F;
+}
+</style>
+
+## {.tabset .tabset-fade}
+
+### Used Libraries
+```{r}
+library(Rsamtools)
+library(dplyr)
+library(ggplot2)
+library(magrittr)
+library(gridExtra)
+library(grid)
+library(lattice)
+library(ATACseqQC)
+library(ggplot2)
+library(gridExtra)
+library(grid)
+library(knitr)
+library(scales)
+library(ChIPseeker)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(ggpubr)
+library(Hmisc)
+library(gdata)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+txdb.hg19 <- TxDb.Hsapiens.UCSC.hg19.knownGene
+seqlevelsStyle(txdb) <- "NCBI"
+seqlevelsStyle(txdb.hg19) <- "NCBI"
+source("NGSTools.R")
+```
+
+### Peak Calling: Fresh Samples
+<h4 style="color:#000080;font-weight:bold">Peak calling</h4>
+We use the peak calling algorithm/software macs2: 
+```{bash}
+macs2 callpeak -f BAMPE -g hs --keep-dup all --cutoff-analysis -n $sample_name -t $bam_file --outdir $outdir
+```
+to call peaks, after removing mitochondrial genes using samtools. After merging all peaks called for at least one of the samples, we, subsequently, look for peaks overlapping regions of 1KB around TSS. In the following we show the peaks across samples for the selected stem cell genes. We also show for each of the cases the distribution of peaks across features using the annotation pie chart.
+
+<h4 style="color:#000080;font-weight:bold">Merging peaks</h4>
+```{bash}
+sort -k1,1 -k2,2n CD13-1.3_peaks.narrowPeak CD13-2.3_peaks.narrowPeak CD13-3.3_peaks.narrowPeak CD24-1.3_peaks.narrowPeak CD24-2.3_peaks.narrowPeak CD24-3.3_peaks.narrowPeak > FS3.sorted.txt
+cat FS3.sorted.txt | mergeBed -c 2,3,4,5,6,7,8,9,10 -o collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > FS3.merged.txt
+# (Default parameters according to this study)
+java atac.pipe.atac.MergedPeaksExpander
+# Explicite parameters
+# java atac.pipe.atac.MergedPeaksExpander -m FS3.merged.txt -s CD24-1.3,CD24-2.3,CD24-3.3,CD13-1.3,CD13-2.3,CD13-3.3 -o FS3.merged.expanded.txt -n true -r 1
+```
+
+<h4 style="color:#000080;font-weight:bold">Annotating merged peaks</h4>
+```{r}
+## Annotate peaks.
+peak_dir.3 <- "peaks_file_dir/" # adjusted p-values and significant.
+gr <- makeGRangesFromDataFrame(as.data.frame(read.table(paste(peak_dir.3, "FS3.merged.expanded.txt", sep=""), sep = "\t", header=T)), keep.extra.columns=T)
+annotated.merged.raw.peaks.3 <- annotatePeak(gr, ignoreOverlap = F, overlap = "TSS", tssRegion=c(-1000, 1000),  TxDb=txdb, annoDb="org.Hs.eg.db")
+
+## Reorder columns
+annotated.merged.peaks.3 <- as.data.frame(annotated.merged.raw.peaks.3@anno)
+n <- ncol(annotated.merged.peaks.3)
+annotated.merged.peaks.3 <- annotated.merged.peaks.3[, c(colnames(annotated.merged.peaks.3)[(n-2):n], colnames(annotated.merged.peaks.3)[1:(n-3)])]
+annotated.merged.peaks.3 <- annotated.merged.peaks.3[!is.na(annotated.merged.peaks.3$ENSEMBL),]
+
+## Generate lists of peaks lying in TSS-regions of different sizes (+/- 1KB, 2KB, 3KB, 4KB, 5KB)
+annotated.tss.peaks.3.list <- vector("list", 20)
+for(i in 4:4){
+  annotated.tss.peaks.3.list[[i]] <- annotated.merged.peaks.3[abs(annotated.merged.peaks.3$distanceToTSS) <= i*250 ,]
+}
+
+genes.FS <- c("CD24","ANPEP","LGR4","PROM1","SOX9","VIM","AKAP12","HAVCR1","KRT7","KRT8",
+              "KRT18","KRT19","VCAM1","NCAM1","CLCNKA","CDH6","LHX","CLDN1","ANXA3","SLC22A6",
+              "LRP2","SLC34A1","POU5F1","CDH16","PCGF6","SALL1","SIX2","MME","CLCN1", "VCAM1",
+              "CDH6")
+selected.annotated.tss.peaks.3 <- annotated.tss.peaks.3.list[[4]][annotated.tss.peaks.3.list[[4]]$SYMBOL %in% genes.FS,]
+detected.sc.genes.fs3 <- unique(selected.annotated.tss.peaks.3$SYMBOL)
+```
+
+### Quantification and Normalization
+<h4 style="color:#008080;font-weight:bold">Counting peaks in promoter region (TSS +/- 1KB)</h4>
+```{r warning=FALSE}
+source("NGSTools.R")
+
+counts.tss.1000 <- counts( 
+                    peaks.list=annotated.tss.peaks.3.list[[4]], 
+                    bam_dir="/scratch/data/projects/kramann/jack.3/2_alignment/", 
+                    bam_labels=c("CD13-1.3","CD13-2.3","CD13-3.3","CD24-1.3","CD24-2.3","CD24-3.3"),
+                    modus="no.mt.",
+                    sample_labels= c("FS3.CD13_R1", "FS3.CD13_R2", "FS3.CD13_R3","FS3.CD24_R1","FS3.CD24_R2", "FS3.CD24_R3")
+                  )
+```
+
+<h4 style="color:#008080;font-weight:bold">Setting Up DESeq object and Normalization</h4>
+```{r}
+library(DESeq2)
+Group  <- factor(c("FS3.CD13", "FS3.CD13","FS3.CD13", "FS3.CD24", "FS3.CD24", "FS3.CD24"))
+metaData        <- data.frame(Group, row.names = colnames(counts.tss.1000)[c(1,2,3,4,5,6)])
+atacDDS.tss.1000   <- DESeqDataSetFromMatrix(counts.tss.1000[,c(1,2,3,4,5,6)], metaData, ~Group)
+# Variance Stabilization
+atac_VSD.tss.1000  <- vst(atacDDS.tss.1000, fitType = "parametric")
+# Regularized Logarithm
+atac_RLOG.tss.1000 <- rlog(atacDDS.tss.1000,  fitType = "parametric")
+```
+
+<h6 style="color:#800000;font-weight:bold">PCA analysis (selected version)</h6>
+```{r fig.width=8, fig.height=6, dpi=600, echo=F}
+jpeg("FS.VSD_PCA.jpg", width = 8, height = 6, units = 'in', res = 600)
+colnames(assay(atac_VSD.tss.1000)) <- c("FS3.CD13_R1","FS3.CD13_R2","FS3.CD13_R3","FS3.CD24_R1","FS3.CD24_R2","FS3.CD24_R3")
+pca.plot(atac_VSD.tss.1000, "Variance Stabilization", scale=F, label="label")
+dev.off()
+```
+
+### Heatmap: Fresh Samples
+
+<h5 style="color:#008080;font-weight:bold">Generate Heatmap</h5>
+```{r}
+selected <- c("PROM1","POU5F1","SALL1","VIM","ANXA2","WNT11","CXCR4","MMP7","EBF2","CCL3L1",
+              "TBXT","KRT7","DUSP2","MEOX1","ATP6V0D2","DEPP1","TLR1","CLDN1","JUN","CUBN",
+              "HNF4A","LRP2","ACSM2B","MME", "SLC3A1","SLC5A12", "SLC22A8","KCNJ9","CLCN7","CDH16")
+# reorder columns
+counts.tss.1000[rownames(counts.tss.1000) %in% selected, c(3,2,1,6,5,4)]
+heatmaps.tss.1000 <- generate.heatmaps(atacDDS.tss.1000, atac_VSD.tss.1000, atac_RLOG.tss.1000, top = "100", selected.genes = selected, order=selected)
+```
+
+<h5 style="color:#008080;font-weight:bold">Heatmap of selected genes</h5>
+```{r fig.height=8, fig.width=4}
+grid.arrange(heatmaps.tss.1000[[6]], ncol=1)
+```
+
+### Differential Analysis
+
+<h4 style="color:#000080;font-weight:bold">Analysis of differential chromatin accessibility in TSS (+/- 1KB) regions</h4>
+
+<h5 style="color:#800000;font-weight:bold">CD24 vs. CD13</h5>
+```{r fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+library(edgeR)
+atacDDS.tss.1000$Group <- relevel(atacDDS.tss.1000$Group, ref="FS3.CD13")
+atacDDS.tss.1000 <- estimateSizeFactors(atacDDS.tss.1000)
+atacDDS.tss.1000 <- estimateDispersionsGeneEst(atacDDS.tss.1000, minDisp = 1e-4)
+atacDDS.tss.1000 <- estimateDispersionsFit(atacDDS.tss.1000, minDisp = 1e-08, fitType =  "local")
+atacDDS.tss.1000 <- estimateDispersionsMAP(atacDDS.tss.1000,  minDisp = 1e-08)
+atacDDS.tss.1000 <- nbinomLRT(atacDDS.tss.1000, reduced = ~1)
+DESeq2::plotMA(atacDDS.tss.1000, ylim=c(-3,4))
+```
+
+### Functional Analysis
+
+```{r echo=T, fig.width=12, fig.height=14}
+source("NGSTools.R")
+compute <- F
+compute.objects <- T
+outDir        <-  "GSEA"
+results_dir   <-  "CD24_vs_CD13"
+database      <-  c("all.go.wd.submission", "all.go.wd.objects.submission")
+database_file <-  "GO_ALL_Broad_Insitute_20181127.gmt"
+if(compute){genesets.scores.all <- gsea(deseq.object = atacDDS.3, outDir = outDir, results_dir = results_dir, database = database[1], database_file = database_file)}
+if(compute.objects){genesets.scores.all.objects <- gsea.objects(deseq.object = atacDDS.3, outDir = outDir, results_dir = results_dir, database = database[2], database_file = database_file)}
+
+list.enriched.gene.sets.groups.tss.1000 <- list(genesets.scores.all.objects[[1]],genesets.scores.all.objects[[2]],genesets.scores.all.objects[[3]])
+names(list.enriched.gene.sets.groups.tss.1000) <- c("fisher","stouffer","reporter")
+go.enrichment.consensus.scores.tss.1000 <- consensusHeatmap(list.enriched.gene.sets.groups.tss.1000,cutoff=50,method="mean", ncharLabel = 100, cex = 1)
+go.enrichment.consensus.heatmap.scores.matrix <- as.data.frame(-log(go.enrichment.consensus.scores.tss.1000$rankMat))
+colnames(go.enrichment.consensus.heatmap.scores.matrix) <- c("Downregulated", "Mixed Downregulated", "Non-directional", "Mixed Upregulated", "Upregulated")
+go.enrichment.consensus.heatmap <- as.grob(pheatmap( go.enrichment.consensus.heatmap.scores.matrix, 
+                                      main = paste("Consensus Heatmap (Fisher, Stouffer, Reporter) - CD24 vs. CD13", sep=""),  fontsize=8,
+                                      border_color = "#AAAAAA",
+                                      cluster_rows=F, 
+                                      show_rownames=T,
+                                      show_colnames = T,
+                                        cluster_cols=F, annotation_legend = T,
+                                        fontsize_row = 8, 
+                                        scale = "row"))
+
+gene.sets.scores <- as.data.frame(go.enrichment.consensus.scores.tss.1000$rankMat)
+gene.sets.scores$score <- ifelse(gene.sets.scores$`Distinct-directional (dn)` > 5000, gene.sets.scores$`Distinct-directional (up)`,  -1*gene.sets.scores$`Distinct-directional (dn)`)
+gene.sets.scores$posscore <- abs(gene.sets.scores$score)
+top.up.gss <- gene.sets.scores[order(gene.sets.scores$`Distinct-directional (up)`),]
+top.up.gss <- top.up.gss[1:25,]
+top.dn.gss <- gene.sets.scores[order(gene.sets.scores$`Distinct-directional (dn)`),]
+top.dn.gss <- top.dn.gss[1:25,]
+gene.sets.scores <- rbind(top.up.gss,top.dn.gss)
+gene.sets.scores <- gene.sets.scores[order(abs(gene.sets.scores$score)),]
+gene.sets.scores <- gene.sets.scores[order(gene.sets.scores$score), c("score", "posscore")]
+gene.sets.scores$gs <- rownames(gene.sets.scores)
+
+genes.set.scores.pValues <- as.data.frame(go.enrichment.consensus.scores.tss.1000$pMat)
+genes.set.scores.pValues$gs <- rownames(genes.set.scores.pValues)
+genes.set.scores.and.pvalues <- merge(genes.set.scores.pValues, gene.sets.scores, by="gs")
+genes.set.scores.and.pvalues.up <- genes.set.scores.and.pvalues[order(genes.set.scores.and.pvalues$`Distinct-directional (up)`),]
+genes.set.scores.and.pvalues.up <- genes.set.scores.and.pvalues.up[1:25,]
+genes.set.scores.and.pvalues.down <- genes.set.scores.and.pvalues[order(genes.set.scores.and.pvalues$`Distinct-directional (dn)`),]
+genes.set.scores.and.pvalues.down <- genes.set.scores.and.pvalues.down[1:25,]
+genes.set.scores.and.pvalues <- rbind(genes.set.scores.and.pvalues.up,genes.set.scores.and.pvalues.down)
+genes.set.scores.and.pvalues$Name <- genes.set.scores.and.pvalues$gs
+genes.set.scores.and.pvalues$p_value_NonDir <- ifelse(genes.set.scores.and.pvalues$`Distinct-directional (dn)` > 0.9, -log10(genes.set.scores.and.pvalues$`Distinct-directional (up)`), log10(genes.set.scores.and.pvalues$`Distinct-directional (dn)`))
+genes.set.scores.and.pvalues$type <- ifelse(genes.set.scores.and.pvalues$`Distinct-directional (dn)` > 0.9, "Upregulated", "Downregulated")
+genes.set.scores.and.pvalues <- genes.set.scores.and.pvalues[order(genes.set.scores.and.pvalues$type, genes.set.scores.and.pvalues$p_value_NonDir),]
+
+firstup <- function(x) {
+  x <- tolower(x)
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  return(x)
+}
+
+jpeg("FS.GO.All.Barplot.200206.jpg", width = 12, height = 14, units = 'in', res = 600)
+genes.set.scores.and.pvalues$norm.score <- max(genes.set.scores.and.pvalues$score)/genes.set.scores.and.pvalues$score
+p.all.local<-ggplot(data=genes.set.scores.and.pvalues, aes(x=reorder((firstup(gsub(pattern = "_", replacement = " ", substr(Name, 4, nchar(Name))))), p_value_NonDir), y=p_value_NonDir, fill=factor(type), width = .9)) + geom_bar(stat="identity", position=position_dodge()) + xlab (NULL) + ylab("Down: log10(p-value) | Up: -log10(p-value)") + theme_minimal() + ggtitle("Enrichment Significance relative: CD24 vs. CD13") + theme( plot.title = element_text(color = "darkred", size = 14, face = "bold", hjust=1.0), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text.y=element_text(size=14,colour="black")) 
+p.all.local + scale_fill_manual(values = setNames(c("blue", "red"), levels(genes.set.scores.and.pvalues$type))) + guides(fill=guide_legend(title="Regulation")) + coord_flip() 
+dev.off()
+
+```
+
+### Author and session Information
+<h4>Analyzed by</h4>
+Dr. Ali T. Abdallah, Dipl. Inf.</br>
+Genomics Facility (Head of Bioinformatics)</br>
+Uniklinik Aachen - IZKF (Interdisziplinäres Zentrum für klinische Forschung)</br>
+Pauwelsstr. 30, 52074 Aachen, Germany</br>
+Phone +49 241 80 35296</br>
+
+<h4>Detailed Session Info</h4>
+```{r echo=FALSE}
+sessionInfo()
+```
