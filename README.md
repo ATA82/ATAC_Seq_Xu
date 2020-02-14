@@ -9,7 +9,8 @@ FS3.CD24_R1: CD24+ sorted cells from human adult kidney tissue.
 FS3.CD24_R2: CD24+ sorted cells from human adult kidney tissue.
 FS3.CD24_R3: CD24+ sorted cells from human adult kidney tissue.
 
-## Description of Processed Data (available at https://figshare.com/s/728705bc42446275044d):
+## Description of Processed Data:
+Available at https://figshare.com/s/728705bc42446275044d .
 _Extended Peak Table:_ 
 A table in an extended narrow peak format containing all peaks overlapping 1KB region aroud TSS.
 _Count Table:_
