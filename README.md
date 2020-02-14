@@ -39,5 +39,17 @@ bcl2fastq-conversion-software.html]. Library complexity was evaluated with Prese
     
 Package Name | Source | Version |
 ------------ | ------------- | ------------- |
-Content from cell 1 | Content from cell 2 |
-Content in the first column | Content in the second column |
+blc2fastq | https://support.illumina.com/sequencing/sequencing_software/
+bcl2fastq-conversion-software.html | 2.20 |
+Preseq | http://smithlabresearch.org/software/preseq/ | 2.0 |
+FastQC | http://www.bioinformatics.babraham.ac.uk/projects/fastqc) ||
+MultiQC | https://multiqc.info/ | 1.7 |
+bwa | bio-bwa.sourceforge.net | 0.7.17 |
+Rsamtools | bioconductor | 2.0.0 |
+samtools | http://www.htslib.org/download/ | 0.1.19 |
+macs2 | https://github.com/taoliu/MACS | 2.2.5 |
+rtracklayer | bioconductor | 1.44.2 |
+ChIPseeker | bioconductor | 1.20.0 |
+Rsubread | bioconductor | 1.34.7 |
+DESeq2 | bioconductor | 1.24.0 |
+piano | bioconductor | 2.0.2 |
